@@ -1,22 +1,12 @@
-import { IsString, IsNotEmpty, IsArray, ValidateNested, IsNumber } from 'class-validator';
-import { Type } from 'class-transformer';
-import { CreateResponseDto } from 'src/response/dto/create-response.dto';
+import { IsNotEmpty, IsArray } from 'class-validator';
+
 export class CreateSurveyDto {
+  @IsNotEmpty()
+  title: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    surveyId: number;
+  @IsNotEmpty()
+  description: string;
 
-    @IsString()
-    @IsNotEmpty()
-    title: string;
-  
-    @IsString()
-    @IsNotEmpty()
-    description: string;
-  
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreateResponseDto)
-    responses: CreateResponseDto[];
-  }
+  @IsArray()
+  questions: { text: string; responses?: { userId: number; answer: string }[] }[];
+}

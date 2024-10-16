@@ -1,22 +1,15 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { ResponseService } from './response.service';
-import { Response } from './entities/response.entity';
+import { SaveResponsesDto } from './dto/save-response.dto';
+import { ResponseMessage } from 'src/types/message';
+import { Response } from 'src/response/entities/response.entity';
+
 @Controller('responses')
 export class ResponseController {
   constructor(private readonly responseService: ResponseService) {}
 
   @Post()
-  create(@Body() response: Response) {
-    return this.responseService.create(response);
-  }
-
-  @Get()
-  findAll() {
-    return this.responseService.findAll();
-  }
-
-  @Get('survey/:surveyId')
-  findBySurvey(@Param('surveyId') surveyId: string) {
-    return this.responseService.findBySurvey(+surveyId);
+  async save(@Body() saveResponsesDto: SaveResponsesDto): Promise<ResponseMessage<Response[]>> {
+    return this.responseService.saveResponses(saveResponsesDto);
   }
 }
