@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import e from 'express';
 import { ResponseMessage } from 'src/types/message';
+import { SuccessHTTPAnswer, ThrowHTTPException } from 'src/shared/http.answer';
 
 @Injectable()
 export class SurveyService {
@@ -20,7 +21,7 @@ export class SurveyService {
   async create(createSurveyDto: CreateSurveyDto): Promise<ResponseMessage<Survey>> {
     const survey : Survey  = await this.findOne(createSurveyDto.surveyId);
     if (survey) {
-      return 
+      return ThrowHTTPException ("Survey already exists", ["surveyId"], 400, "SURVEY_ALREADY_EXISTS");
     }
     const newSurvey = new Survey();
     newSurvey.title = createSurveyDto.title;
@@ -40,13 +41,14 @@ export class SurveyService {
       return response;
     }));
 
-    return ;
+    return SuccessHTTPAnswer("Survey created successfully", savedSurvey);
   }
-  async update(id: number, updateSurveyDto: CreateSurveyDto): Promise<Survey> {
+  async update(id: number, updateSurveyDto: CreateSurveyDto): Promise<ResponseMessage<Survey>> {
     const survey = await this.findOne(id);
     survey.title = updateSurveyDto.title;
     survey.description = updateSurveyDto.description;
-    return this.surveyRepository.save(survey);
+
+    return SuccessHTTPAnswer("Survey updated successfully", await this.surveyRepository.save(survey));
   }
   async findAll(): Promise<Survey[]> {
     return this.surveyRepository.find();
