@@ -2,16 +2,25 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SurveyModule } from './survey/survey.module';
 import { ResponseModule } from './response/response.module';
+import { Response } from './response/entities/response.entity';
+import { Question } from './survey/entities/question.entity';
+import { Survey } from './survey/entities/survey.entity';
 
 @Module({
+
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST,
-      port: +process.env.DB_PORT, 
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
+      host: 'localhost',
+      port: 5432, 
+      username: 'postgres',
+      password: 'postgres',
+      database: 'SurveyDB',
+      entities: [
+        Survey,
+        Question,
+        Response
+      ],
       autoLoadEntities: true,
       synchronize: true,
     }),
