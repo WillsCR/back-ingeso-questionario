@@ -8,6 +8,7 @@ export class SurveyController {
 
   @Post()
   create(@Body() survey: Survey) {
+    
     return this.surveyService.create(survey);
   }
 
@@ -20,4 +21,4 @@ export class SurveyController {
   findOne(@Param('id') id: string) {
     return this.surveyService.findOne(+id);
   }
-}
+} 

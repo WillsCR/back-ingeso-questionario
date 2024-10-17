@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, NotFoundException } from '@nestjs/common';
 import { ResponseService } from './response.service';
 import { SaveResponsesDto } from './dto/save-response.dto';
 import { ResponseMessage } from 'src/types/message';
@@ -11,5 +11,19 @@ export class ResponseController {
   @Post()
   async save(@Body() saveResponsesDto: SaveResponsesDto): Promise<ResponseMessage<Response[]>> {
     return this.responseService.saveResponses(saveResponsesDto);
+  }
+
+  @Post('user/:userId/survey/:surveyId')
+  async getUserResponsesBySurvey(@Param('userId') userId: number, @Param('surveyId') surveyId: number): Promise<Response[]> {
+    return this.responseService.getUserResponsesBySurvey(userId, surveyId);
+  }
+  
+  @Get('/answered-surveys/:userId')
+  async getAnsweredSurveysByUser(@Param('userId') userId: number) {
+    const surveys = await this.responseService.getAnsweredSurveysByUser(userId);
+    if (!surveys.length) {
+      throw new NotFoundException('No answered surveys found for the given user.');
+    }
+    return surveys;
   }
 }

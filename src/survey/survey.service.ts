@@ -18,7 +18,8 @@ export class SurveyService {
     @InjectRepository(Response)
     private readonly responseRepository: Repository<Response>,
   ) {}
-  //falta la validacion de http
+  //se puede ocupar tambien solo poniendo los 
+  //atributos pero mejor poner el dto
   async create(createSurveyDto: CreateSurveyDto): Promise<ResponseMessage<Survey>> {
     const newSurvey = new Survey();
     newSurvey.title = createSurveyDto.title;
@@ -41,22 +42,28 @@ export class SurveyService {
   
       return question;
     });
-  
+    
     const savedSurvey = await this.surveyRepository.save(newSurvey);
     
-    // Guardar respuestas asociadas a las preguntas
+    
     for (const question of newSurvey.questions) {
       await this.responseRepository.save(question.responses);
     }
   
-    return SuccessHTTPAnswer("Survey created successfully", savedSurvey);
+    return {
+      success: true,
+      message: 'Survey created successfully',
+      data: savedSurvey
+    };
   }
   async update(id: number, updateSurveyDto: CreateSurveyDto): Promise<ResponseMessage<Survey>> {
     const survey = await this.findOne(id);
     survey.title = updateSurveyDto.title;
     survey.description = updateSurveyDto.description;
 
-    return SuccessHTTPAnswer("Survey updated successfully", await this.surveyRepository.save(survey));
+  return {success: true, 
+          message: 'Survey updated successfully', 
+          data: await this.surveyRepository.save(survey)}; ;
   }
   async findAll(): Promise<Survey[]> {
     return this.surveyRepository.find();
