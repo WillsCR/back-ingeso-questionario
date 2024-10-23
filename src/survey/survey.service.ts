@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateSurveyDto } from './dto/create-survey.dto';
 import { Survey } from './entities/survey.entity';
 import { Repository } from 'typeorm';
@@ -21,49 +21,49 @@ export class SurveyService {
   ) {}
 
   async create(createSurveyDto: CreateSurveyDto): Promise<ResponseMessage<Survey>> {
-    // Crear nueva encuesta
     const newSurvey = new Survey();
     newSurvey.title = createSurveyDto.title;
     newSurvey.description = createSurveyDto.description;
     newSurvey.subjectName = createSurveyDto.subjectName;
     newSurvey.professorName = createSurveyDto.professorName;
     newSurvey.studentName = createSurveyDto.studentName;
-
-    // Crear dimensiones y asociar ítems
-    newSurvey.dimensions = await Promise.all(
+  
+    try {
+      const savedSurvey = await this.surveyRepository.save(newSurvey);
+      
+      // Crear dimensiones y asociar ítems
+      await Promise.all(
         createSurveyDto.dimensions.map(async (dimensionDto) => {
-            const dimension = new Dimension();
-            dimension.name = dimensionDto.name;
-
-            // Crear ítems y asociarlos a la dimensión
-            dimension.items = await Promise.all(
-                dimensionDto.items.map(async (itemDto) => {
-                    const item = new Item();
-                    item.text = itemDto.text;
-
-                    // Asociar el ítem a la dimensión
-                    item.dimension = dimension; // Necesario para mantener la relación
-
-                    // Guardar el ítem
-                    return this.itemRepository.save(item);
-                })
-            );
-
-            // Guardar la dimensión
-            return this.dimensionRepository.save(dimension);
+          const dimension = new Dimension();
+          dimension.name = dimensionDto.name;
+          dimension.survey = savedSurvey; // Asocia la dimensión a la nueva encuesta
+  
+          const savedDimension = await this.dimensionRepository.save(dimension);
+  
+          // Crear ítems y asociarlos a la dimensión
+          await Promise.all(
+            dimensionDto.items.map(async (itemDto) => {
+              const item = new Item();
+              item.text = itemDto.text;
+              item.dimension = savedDimension; // Establece la relación con la dimensión
+              await this.itemRepository.save(item);
+            })
+          );
         })
-    );
-
-    // Guardar la encuesta con dimensiones e ítems
-    const savedSurvey = await this.surveyRepository.save(newSurvey);
-
-    return {
+      );
+  
+      return {
         success: true,
         message: 'Survey created successfully',
         data: savedSurvey,
-    };
+      };
+    } catch (error) {
+      console.error("Error creating survey:", error);
+      throw new InternalServerErrorException('Could not create survey');
+    }
   }
-
+  
+  
   async update(id: number, updateSurveyDto: CreateSurveyDto): Promise<ResponseMessage<Survey>> {
     const survey = await this.findOne(id);
     survey.title = updateSurveyDto.title;
@@ -71,32 +71,32 @@ export class SurveyService {
     survey.subjectName = updateSurveyDto.subjectName;
     survey.professorName = updateSurveyDto.professorName;
     survey.studentName = updateSurveyDto.studentName;
-
-    // Actualizar las dimensiones e ítems si es necesario
+  
+    // Actualizar dimensiones e ítems
     survey.dimensions = await Promise.all(
-        updateSurveyDto.dimensions.map(async (dimensionDto) => {
-            const dimension = new Dimension();
-            dimension.name = dimensionDto.name;
-
-            // Crear ítems y asociarlos a la dimensión
-            dimension.items = await Promise.all(
-                dimensionDto.items.map(async (itemDto) => {
-                    const item = new Item();
-                    item.text = itemDto.text;
-
-                    // Asociar el ítem a la dimensión
-                    item.dimension = dimension;
-
-                    // Guardar el ítem
-                    return this.itemRepository.save(item);
-                })
-            );
-
-            // Guardar la dimensión
-            return this.dimensionRepository.save(dimension);
-        })
+      updateSurveyDto.dimensions.map(async (dimensionDto) => {
+        const dimension = new Dimension();
+        dimension.name = dimensionDto.name;
+  
+        dimension.items = await Promise.all(
+          dimensionDto.items.map(async (itemDto) => {
+            const item = new Item();
+            item.text = itemDto.text;
+  
+            // Asociar el ítem a la dimensión
+            item.dimension = dimension;
+  
+            // Guardar el ítem
+            return this.itemRepository.save(item);
+          })
+        );
+  
+        // Guardar la dimensión
+        return this.dimensionRepository.save(dimension);
+      })
     );
-
+  
+    // Guardar la encuesta actualizada
     const updatedSurvey = await this.surveyRepository.save(survey);
     return {
       success: true,
@@ -104,6 +104,7 @@ export class SurveyService {
       data: updatedSurvey,
     };
   }
+  
 
   async findAll(): Promise<Survey[]> {
     return this.surveyRepository.find({

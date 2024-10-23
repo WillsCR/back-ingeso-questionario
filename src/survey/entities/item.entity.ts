@@ -5,7 +5,7 @@ import { Dimension } from './dimension.entity';
 export class Item {
   @PrimaryGeneratedColumn()
   id: number;
-
+ 
   @Column()
   text: string; 
 

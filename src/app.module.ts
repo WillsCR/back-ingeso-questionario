@@ -15,7 +15,7 @@ import { Survey } from './survey/entities/survey.entity';
       port: 5432,
       username: 'postgres',
       password: 'postgres',
-      database: 'SurveyDB',
+      database: 'DbEncuestasUcn',
       entities: [
         Survey,
         Item, 

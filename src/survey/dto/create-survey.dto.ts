@@ -1,18 +1,15 @@
 import { IsNotEmpty, IsArray, ValidateNested, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
+// DTO para los ítems dentro de una dimensión
 class CreateItemDto {
   @IsNotEmpty()
   text: string;
 
- 
-  // @IsArray()
-  // @ValidateNested({ each: true })
-  // @Type(() => CreateResponseDto)
-  // @IsOptional()
-  // responses?: CreateResponseDto[];
+  // Otras propiedades relacionadas con respuestas pueden ser agregadas aquí
 }
 
+// DTO para las dimensiones de la encuesta
 class CreateDimensionDto {
   @IsNotEmpty()
   name: string;
@@ -20,27 +17,28 @@ class CreateDimensionDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateItemDto)
-  items: CreateItemDto[];
+  items: CreateItemDto[]; // Lista de ítems que pertenecen a esta dimensión
 }
 
+// DTO principal para la encuesta
 export class CreateSurveyDto {
   @IsNotEmpty()
-  title: string;
+  title: string; // Título de la encuesta
 
   @IsNotEmpty()
-  description: string;
+  description: string; // Descripción de la encuesta
 
   @IsNotEmpty()
-  subjectName: string;
+  subjectName: string; // Nombre de la asignatura
 
   @IsNotEmpty()
-  professorName: string;
+  professorName: string; // Nombre del profesor
 
   @IsOptional()
-  studentName?: string;
+  studentName?: string; // Nombre del estudiante (opcional)
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateDimensionDto)
-  dimensions: CreateDimensionDto[];
+  dimensions: CreateDimensionDto[]; // Lista de dimensiones de la encuesta
 }

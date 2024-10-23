@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Survey } from './survey.entity';
 import { Item } from './item.entity';
 
@@ -11,6 +11,7 @@ export class Dimension {
   name: string;
 
   @ManyToOne(() => Survey, survey => survey.dimensions)
+  @JoinColumn()
   survey: Survey;
 
   @OneToMany(() => Item, item => item.dimension)
