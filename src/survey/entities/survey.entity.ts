@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Response } from 'src/response/entities/response.entity';
-import { Question } from './question.entity';
+import { Dimension } from './dimension.entity';
+
 @Entity()
 export class Survey {
   @PrimaryGeneratedColumn()
@@ -12,9 +12,15 @@ export class Survey {
   @Column()
   description: string;
 
-  @OneToMany(() => Response, response => response.question)
-  responses: Response[];
+  @Column()
+  subjectName: string; // Nombre de la asignatura
 
-  @OneToMany(() => Question, question => question.survey)
-  questions: Question[];
+  @Column()
+  professorName: string; // Profesor de la asignatura
+
+  @Column({ nullable: true })
+  studentName?: string; // Nombre del alumno (opcional)
+
+  @OneToMany(() => Dimension, dimension => dimension.survey)
+  dimensions: Dimension[];
 }

@@ -1,16 +1,22 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Question } from 'src/survey/entities/question.entity';
+import { Item } from 'src/survey/entities/item.entity';
+
 @Entity()
 export class Response {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  userId: number;
+  userId: number; 
 
   @Column()
-  answer: string;
+  answer: string; 
 
-  @ManyToOne(() => Question, question => question.responses)
-  question: Question;
+  
+  @Column()
+  itemId: number; 
+
+ 
+  @ManyToOne(() => Item, { onDelete: 'CASCADE' })
+  item: Item; 
 }

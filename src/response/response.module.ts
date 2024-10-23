@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ResponseService } from './response.service';
 import { Response } from './entities/response.entity';
-import { Question } from 'src/survey/entities/question.entity';
-import { Survey } from 'src/survey/entities/survey.entity';
-import { ResponseController } from './response.controller'; // Si tienes un controlador
+import { Item } from 'src/survey/entities/item.entity'; 
+import { Dimension } from 'src/survey/entities/dimension.entity'; 
+import { ResponseController } from './response.controller'; 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Response, Question, Survey]), 
+    TypeOrmModule.forFeature([Response, Item, Dimension]), 
   ],
   providers: [ResponseService], 
   controllers: [ResponseController], 

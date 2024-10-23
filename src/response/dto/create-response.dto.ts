@@ -1,10 +1,15 @@
-import { IsString, IsNotEmpty, IsArray, ValidateNested } from 'class-validator';
+import { IsNumber, IsNotEmpty, IsString } from 'class-validator';
+
 export class CreateResponseDto {
-    @IsNotEmpty()
-    userId: number;
-  
-    @IsString()
-    @IsNotEmpty()
-    answer: string;
-  }
-  
+  @IsNumber()
+  @IsNotEmpty()
+  userId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  itemId: number; 
+
+  @IsString()
+  @IsNotEmpty()
+  answer: string;
+}
