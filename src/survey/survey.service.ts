@@ -24,28 +24,26 @@ export class SurveyService {
     const newSurvey = new Survey();
     newSurvey.title = createSurveyDto.title;
     newSurvey.description = createSurveyDto.description;
-    newSurvey.subjectName = createSurveyDto.subjectName;
-    newSurvey.professorName = createSurveyDto.professorName;
-    newSurvey.studentName = createSurveyDto.studentName;
   
     try {
       const savedSurvey = await this.surveyRepository.save(newSurvey);
       
-      // Crear dimensiones y asociar ítems
+      
       await Promise.all(
         createSurveyDto.dimensions.map(async (dimensionDto) => {
           const dimension = new Dimension();
           dimension.name = dimensionDto.name;
-          dimension.survey = savedSurvey; // Asocia la dimensión a la nueva encuesta
+          dimension.tipo = dimensionDto.tipo;
+          dimension.survey = savedSurvey; 
   
           const savedDimension = await this.dimensionRepository.save(dimension);
   
-          // Crear ítems y asociarlos a la dimensión
+          
           await Promise.all(
             dimensionDto.items.map(async (itemDto) => {
               const item = new Item();
               item.text = itemDto.text;
-              item.dimension = savedDimension; // Establece la relación con la dimensión
+              item.dimension = savedDimension; 
               await this.itemRepository.save(item);
             })
           );
@@ -68,10 +66,7 @@ export class SurveyService {
     const survey = await this.findOne(id);
     survey.title = updateSurveyDto.title;
     survey.description = updateSurveyDto.description;
-    survey.subjectName = updateSurveyDto.subjectName;
-    survey.professorName = updateSurveyDto.professorName;
-    survey.studentName = updateSurveyDto.studentName;
-  
+
     // Actualizar dimensiones e ítems
     survey.dimensions = await Promise.all(
       updateSurveyDto.dimensions.map(async (dimensionDto) => {

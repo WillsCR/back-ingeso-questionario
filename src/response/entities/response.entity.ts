@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Item } from 'src/survey/entities/item.entity';
 
 @Entity()
@@ -9,14 +9,10 @@ export class Response {
   @Column()
   userId: number; 
 
-  @Column()
+  @Column('text') 
   answer: string; 
-
-  
-  @Column()
-  itemId: number; 
-
  
   @ManyToOne(() => Item, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'itemId' }) 
   item: Item; 
 }

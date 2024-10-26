@@ -8,9 +8,7 @@ export class Item {
  
   @Column()
   text: string; 
-
-  @ManyToOne(() => Dimension, dimension => dimension.items)
+    
+  @ManyToOne(() => Dimension, dimension => dimension.items, { onDelete: 'CASCADE' })
   dimension: Dimension;
-
-  
 }

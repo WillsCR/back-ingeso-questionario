@@ -14,62 +14,66 @@ export class ResponseService {
     @InjectRepository(Response)
     private readonly responseRepository: Repository<Response>,
 
-    @InjectRepository(Item) 
+    @InjectRepository(Item)
     private readonly itemRepository: Repository<Item>,
   ) {}
 
   async saveResponses(saveResponsesDto: SaveResponsesDto): Promise<ResponseMessage<Response[]>> {
     const savedResponses: Response[] = [];
 
-    for (const responseDto of saveResponsesDto.responses) {
-      const item = await this.itemRepository.findOneBy({ id: responseDto.itemId }); 
+    
+    const responsePromises = saveResponsesDto.responses.map(async (responseDto) => {
+      const item = await this.itemRepository.findOne({
+        where: { id: responseDto.itemId },
+      });
+
       if (!item) {
-        await ThrowHTTPException("Item not found", ["itemId"], 404, "ITEM_NOT_FOUND");
+        throw await ThrowHTTPException("Item not found", ["itemId"], 404, "ITEM_NOT_FOUND");
       }
 
-      const newResponse = new Response();
-      newResponse.userId = saveResponsesDto.userId;
-      newResponse.answer = responseDto.answer;
-      newResponse.itemId = item.id; // Asignar itemId en lugar de item
+      const newResponse = this.responseRepository.create({
+        userId: saveResponsesDto.userId,
+        answer: responseDto.answer,
+        item, 
+      });
 
-      savedResponses.push(await this.responseRepository.save(newResponse));
-    }
+      return this.responseRepository.save(newResponse);
+    });
+
+    savedResponses.push(...await Promise.all(responsePromises));
 
     return SuccessHTTPAnswer("Responses saved successfully", savedResponses);
   }
-  
+
   async getUserResponsesBySurvey(userId: number, surveyId: number): Promise<Response[]> {
+    
+    const itemIds = await this.itemRepository.find({
+      where: {
+        dimension: {
+          survey: { id: surveyId },
+        },
+      },
+      relations: ['dimension'],
+    }).then(items => items.map(item => item.id));
+  
+    
     return this.responseRepository.find({
       where: {
         userId,
-        itemId: In(
-          // Obtiene todos los IDs de los ítems relacionados con la encuesta
-          await this.itemRepository.find({ 
-            where: { 
-              dimension: { 
-                survey: { 
-                  id: surveyId 
-                } 
-              } 
-            },
-            relations: ['dimension']
-          }).then(items => items.map(item => item.id))
-        ),
+        item: { id: In(itemIds) }, 
       },
-      relations: ['item'], // Mantén la relación para cargar el ítem
+      relations: ['item'], 
     });
   }
 
   async getAnsweredSurveysByUser(userId: number): Promise<Survey[]> {
     const responses = await this.responseRepository.find({
-      where: {
-        userId,
-      },
-      relations: ['item', 'item.dimension', 'item.dimension.survey'], 
+      where: { userId },
+      relations: ['item', 'item.dimension', 'item.dimension.survey'],
     });
-  
-    // Cambia a dimension y luego survey
-    const surveyIds = Array.from(new Set(responses.map(response => response.item.dimension.survey.id))); 
+
+    const surveyIds = Array.from(new Set(responses.map(res => res.item.dimension.survey.id)));
+
     return this.itemRepository.manager.find(Survey, { where: { id: In(surveyIds) } });
   }
 }

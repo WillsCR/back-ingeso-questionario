@@ -13,9 +13,10 @@ export class ResponseController {
     return this.responseService.saveResponses(saveResponsesDto);
   }
 
-  @Post('user/:userId/survey/:surveyId')
-  async getUserResponsesBySurvey(@Param('userId') userId: number, @Param('surveyId') surveyId: number): Promise<Response[]> {
-    return this.responseService.getUserResponsesBySurvey(userId, surveyId);
+  @Get('user/:userId/survey/:surveyId') 
+  async getUserResponsesBySurvey(@Param('userId') userId: string, @Param('surveyId') surveyId: string): Promise<Response[]> {
+    
+    return this.responseService.getUserResponsesBySurvey(+userId, +surveyId); 
   }
   
   @Get('/answered-surveys/:userId')

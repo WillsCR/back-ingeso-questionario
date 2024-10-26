@@ -12,15 +12,6 @@ export class Survey {
   @Column()
   description: string;
 
-  @Column()
-  subjectName: string; // Nombre de la asignatura
-
-  @Column()
-  professorName: string; // Profesor de la asignatura
-
-  @Column({ nullable: true })
-  studentName?: string; // Nombre del alumno (opcional)
-
-  @OneToMany(() => Dimension, dimension => dimension.survey)
+  @OneToMany(() => Dimension, dimension => dimension.survey,{ cascade: true })
   dimensions: Dimension[];
 }

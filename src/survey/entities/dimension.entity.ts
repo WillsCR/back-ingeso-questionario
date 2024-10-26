@@ -2,6 +2,12 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany, JoinColum
 import { Survey } from './survey.entity';
 import { Item } from './item.entity';
 
+export enum DimensionType {
+  AGREED_LEVEL = 'Agreedlevel',
+  FREE_TEXT = 'freetext',
+  IDENTIDAD = 'Identidad',
+}
+
 @Entity()
 export class Dimension {
   @PrimaryGeneratedColumn()
@@ -10,10 +16,17 @@ export class Dimension {
   @Column()
   name: string;
 
-  @ManyToOne(() => Survey, survey => survey.dimensions)
+  @Column({
+    type: 'enum',
+    enum: DimensionType,
+    default: DimensionType.FREE_TEXT, 
+  })
+  tipo: DimensionType;
+
+  @ManyToOne(() => Survey, survey => survey.dimensions, { onDelete: 'CASCADE' })
   @JoinColumn()
   survey: Survey;
 
-  @OneToMany(() => Item, item => item.dimension)
+  @OneToMany(() => Item, item => item.dimension, { cascade: true })
   items: Item[];
 }
