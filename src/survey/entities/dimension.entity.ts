@@ -6,6 +6,7 @@ export enum DimensionType {
   AGREED_LEVEL = 'Agreedlevel',
   FREE_TEXT = 'freetext',
   IDENTIDAD = 'Identidad',
+  AGREED_LEVEL_2 = 'Agreedlevel2'
 }
 
 @Entity()

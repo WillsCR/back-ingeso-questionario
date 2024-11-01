@@ -76,4 +76,30 @@ export class ResponseService {
 
     return this.itemRepository.manager.find(Survey, { where: { id: In(surveyIds) } });
   }
+
+
+  async getUserResponsesBySubject(userId: number, subject: string): Promise<Response[]> {
+    
+    const subjectItem = await this.itemRepository.findOne({
+        where: {
+            text: 'Nombre Asignatura',
+        }
+    });
+
+    if (!subjectItem) {
+        throw await ThrowHTTPException("Subject item not found", ["item"], 404, "SUBJECT_ITEM_NOT_FOUND");
+    }
+
+    
+    const userResponses = await this.responseRepository.find({
+        where: {
+            userId,
+            item: { id: subjectItem.id },
+            answer: subject, 
+        },
+        relations: ['item'], 
+    });
+
+    return userResponses;
+}
 }
