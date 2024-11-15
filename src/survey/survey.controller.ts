@@ -7,7 +7,7 @@ import { ResponseMessage } from 'src/types/message';
 @Controller('surveys')
 export class SurveyController {
   constructor(private readonly surveyService: SurveyService) {}
-//aaa
+
   @Post()
   async create(@Body() createSurveyDto: CreateSurveyDto): Promise<ResponseMessage<Survey>> {
     return this.surveyService.create(createSurveyDto);

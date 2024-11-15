@@ -6,6 +6,7 @@ import { Response } from './response/entities/response.entity';
 import { Item } from './survey/entities/item.entity'; 
 import { Dimension } from './survey/entities/dimension.entity'; 
 import { Survey } from './survey/entities/survey.entity';
+import { SurveyAssignmentModule } from './userSurveyAssigment/userSurveyAssigment.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { Survey } from './survey/entities/survey.entity';
     }),
     SurveyModule,
     ResponseModule,
+    SurveyAssignmentModule
   ],
 })
 export class AppModule {}

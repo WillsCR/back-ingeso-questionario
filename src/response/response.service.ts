@@ -89,8 +89,6 @@ export class ResponseService {
     if (!subjectItem) {
         throw await ThrowHTTPException("Subject item not found", ["item"], 404, "SUBJECT_ITEM_NOT_FOUND");
     }
-
-    
     const userResponses = await this.responseRepository.find({
         where: {
             userId,

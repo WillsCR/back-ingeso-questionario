@@ -67,7 +67,7 @@ export class SurveyService {
     survey.title = updateSurveyDto.title;
     survey.description = updateSurveyDto.description;
 
-    // Actualizar dimensiones e ítems
+    
     survey.dimensions = await Promise.all(
       updateSurveyDto.dimensions.map(async (dimensionDto) => {
         const dimension = new Dimension();
@@ -78,20 +78,20 @@ export class SurveyService {
             const item = new Item();
             item.text = itemDto.text;
   
-            // Asociar el ítem a la dimensión
+            
             item.dimension = dimension;
   
-            // Guardar el ítem
+           
             return this.itemRepository.save(item);
           })
         );
   
-        // Guardar la dimensión
+       
         return this.dimensionRepository.save(dimension);
       })
     );
   
-    // Guardar la encuesta actualizada
+    
     const updatedSurvey = await this.surveyRepository.save(survey);
     return {
       success: true,

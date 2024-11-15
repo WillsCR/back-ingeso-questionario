@@ -1,22 +1,29 @@
-import { IsNumber, IsNotEmpty, IsArray, ValidateNested, IsString } from 'class-validator';
+import { 
+  IsNumber, 
+  IsNotEmpty, 
+  IsArray, 
+  ValidateNested, 
+  IsString 
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class ResponseItemDto {
   @IsNumber()
-  @IsNotEmpty()
-  itemId: number; 
+  @IsNotEmpty({ message: 'El itemId no puede estar vacío' })
+  itemId: number;
+
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'La respuesta no puede estar vacía' })
   answer: string;
 }
 
 export class SaveResponsesDto {
   @IsNumber()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'El userId es obligatorio' })
   userId: number;
 
-  @IsArray()
+  @IsArray({ message: 'Las respuestas deben ser un arreglo' })
   @ValidateNested({ each: true })
   @Type(() => ResponseItemDto) 
-  responses: ResponseItemDto[]; 
+  responses: ResponseItemDto[];
 }

@@ -3,10 +3,10 @@ import { Survey } from './survey.entity';
 import { Item } from './item.entity';
 
 export enum DimensionType {
-  AGREED_LEVEL = 'Agreedlevel',
+  AGREED_LEVEL = 'Agreedlevel',   //categorico
   FREE_TEXT = 'freetext',
   IDENTIDAD = 'Identidad',
-  AGREED_LEVEL_2 = 'Agreedlevel2'
+  AGREED_LEVEL_2 = 'Agreedlevel2' //numerico
 }
 
 @Entity()
