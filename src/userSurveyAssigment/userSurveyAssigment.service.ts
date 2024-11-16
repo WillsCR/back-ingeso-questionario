@@ -43,10 +43,12 @@ export class SurveyAssignmentService {
       await this.sendEmailReminder(assignment.userId, assignment.survey.id , assignment.endDate); ;
     }
   };
+
+  //PARTES A CAMBIAR 
   private async sendEmailReminder(userId: string, surveyId: number , Date: Date) {
     
     const userEmail = await this.getUserEmail(userId);
-//CAMBIAR ESTO CUANDO TENGA ALGUN TIPO DE GET USUARIO POR ID
+  //CAMBIAR ESTO CUANDO TENGA ALGUN TIPO DE GET USUARIO POR ID
     await this.sendSurveyReminder(
      'John Doe',
       userEmail,
@@ -54,14 +56,26 @@ export class SurveyAssignmentService {
       Date
     );
   }
-
+  //AQUI CONECTAR AL OTRO SERVICIO
   private async getUserEmail(userId: string): Promise<string> {
     return `user${userId}@example.com`;
   }
   
+  //PARA PROBAR SIN CONECTAR AL OTRO SERVICIO
+  async sednEmail(surveyId: number ) {
+    const userEmail = 'drkoppa.10@gmail.com'
+    const date = new Date();
+    date.setTime(date.getTime()+1);
+    await this.sendSurveyReminder(
+      'John Doe',
+      userEmail,
+      surveyId,
+      date
+    );
+  }
 
   async sendSurveyReminder(userName: string, userEmail: string, surveyId: number, endDate: Date): Promise<SentMessageInfo> {
-    const surveyLink = `http://tu-sitio.com/encuesta/${surveyId}`;
+    const surveyLink = process.env.CLIENT_URL;
     return await this.mailerService.sendMail({
       to: userEmail,
       from: '"Equipo de soporte" <support@example.com>',

@@ -7,16 +7,21 @@ import { Item } from './survey/entities/item.entity';
 import { Dimension } from './survey/entities/dimension.entity'; 
 import { Survey } from './survey/entities/survey.entity';
 import { SurveyAssignmentModule } from './userSurveyAssigment/userSurveyAssigment.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(
+    {
+      isGlobal: true,}
+    ),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'postgres',
-      database: 'ingesoUCN',
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DATABASE_NAME,
       entities: [
         Survey,
         Item, 

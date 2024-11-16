@@ -8,15 +8,17 @@ import { MailerModule } from '@nestjs-modules/mailer';
 
 @Global()
 @Module({
-  //CONFIGURAR LUEGO CUANDO SEPA USARLO
+  
   imports: [
     TypeOrmModule.forFeature([SurveyAssignment, Survey]),
     MailerModule.forRoot({
       transport: {
         host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
         auth: {
-          user: 'pids.email.test@gmail.com',
-          pass: 'pdpr estp idlw iajo',
+          user: process.env.MAIL,
+          pass: process.env.PASSWORD,
         },
       },
       defaults: {

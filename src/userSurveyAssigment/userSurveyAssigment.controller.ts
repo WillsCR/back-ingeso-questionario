@@ -16,6 +16,8 @@ export class SurveyAssignmentController {
      await this.assignmentService.markAsCompleted(id);
    
   }
-
-  
+  @Post('reminder/:surveyId')
+  async sendEmailReminder(@Param('surveyId') surveyId: number ) {
+  await this.assignmentService.sednEmail(surveyId);
+ }
 }
