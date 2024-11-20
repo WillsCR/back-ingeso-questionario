@@ -27,4 +27,13 @@ export class ResponseController {
     }
     return surveys;
   }
+  //OBTIENES LAS RESPUESTAS DE UN USUARIO POR ASIGNATURA
+  @Get('/user/:userId/subject/:subject')
+  async getUserResponsesBySubject(@Param('userId') userId: string, @Param('subject') subject: string): Promise<Response[]> {
+    const responses = await this.responseService.getUserResponsesBySubject(+userId, subject);
+    if (!responses.length) {
+      throw new NotFoundException('No responses found for the given user and subject.');
+    }
+    return responses;
+  }
 }

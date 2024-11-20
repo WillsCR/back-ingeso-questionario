@@ -6,6 +6,8 @@ import {Cron, CronExpression } from '@nestjs/schedule';
 import { ResponseMessage } from 'src/types/message';
 import { MailerService } from '@nestjs-modules/mailer';
 import { SentMessageInfo } from 'nodemailer';
+import { User } from './types';
+import axios from 'axios';
 @Injectable()
 export class SurveyAssignmentService {
   constructor(
@@ -47,18 +49,24 @@ export class SurveyAssignmentService {
   //PARTES A CAMBIAR 
   private async sendEmailReminder(userId: string, surveyId: number , Date: Date) {
     
-    const userEmail = await this.getUserEmail(userId);
+    const user : User = await this.getUser(userId);
   //CAMBIAR ESTO CUANDO TENGA ALGUN TIPO DE GET USUARIO POR ID
     await this.sendSurveyReminder(
-     'John Doe',
-      userEmail,
+      user.firstName + ' ' + user.lastName,
+      user.email,
       surveyId,
       Date
     );
   }
   //AQUI CONECTAR AL OTRO SERVICIO
-  private async getUserEmail(userId: string): Promise<string> {
-    return `user${userId}@example.com`;
+  private async getUser(userId: string): Promise<User> {
+    try {
+      const response = await axios.get<User>(`${process.env.PUERTO_USER}/user/${userId}`);
+      return response.data; 
+    } catch (error) {
+      console.error(`Error al obtener el usuario con ID ${userId}:`, error);
+      throw new Error('No se pudo obtener el usuario');
+    }
   }
   
   //PARA PROBAR SIN CONECTAR AL OTRO SERVICIO
