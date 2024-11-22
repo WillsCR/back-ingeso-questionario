@@ -9,12 +9,19 @@ export class SurveyAssignment {
   @Column()
   userId: string; 
 
-  @ManyToOne(() => Survey, survey => survey.assignments, { onDelete: 'CASCADE' })
-  survey: Survey;
-
   @Column({ type: 'date' })
   endDate: Date;
 
   @Column({ default: false })
   completed: boolean; 
+
+  @ManyToOne(() => Survey, survey => survey.assignments, { onDelete: 'CASCADE' })
+  survey: Survey;
+
+  @Column()
+  userMail: string
+
+  @Column()
+  signature: string
+
 }

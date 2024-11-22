@@ -8,31 +8,55 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { SentMessageInfo } from 'nodemailer';
 import { User } from './types';
 import axios from 'axios';
+import { Survey } from 'src/survey/entities/survey.entity';
+import { CreateAssignmentDto } from './dto/surveyAssigment.dto';
 @Injectable()
 export class SurveyAssignmentService {
   constructor(
     @InjectRepository(SurveyAssignment)
     private readonly assignmentRepository: Repository<SurveyAssignment>,
+    private readonly surveyRepository: Repository<Survey>,
     private mailerService: MailerService
   ) {}
 
-  async createAssignment(data: Partial<SurveyAssignment>): Promise<SurveyAssignment> {
-    const assignment = this.assignmentRepository.create(data);
+  async createAssignment(
+    CreateAssignmentDto: CreateAssignmentDto
+  ): Promise<SurveyAssignment> {
+   
+    const survey = await this.surveyRepository.findOne({ where: { id: CreateAssignmentDto.surveyId } });
+    if (!survey) {
+      throw new Error('Survey not found');
+    }
+
+   
+    const assignment = this.assignmentRepository.create({
+      userId: CreateAssignmentDto.userId,
+      survey: survey,
+      endDate: CreateAssignmentDto.endDate,
+      userMail: CreateAssignmentDto.userMail,
+      signature: CreateAssignmentDto.signature
+    });
+
     return this.assignmentRepository.save(assignment);
   }
-
   async findAssignmentsExpiringOn(date: Date): Promise<SurveyAssignment[]> {
     return this.assignmentRepository.find({
       where: { endDate: date, completed: false },
       relations: ['survey'],
     });
   }
-
-  async markAsCompleted(assignmentId: number): Promise<void> {
-     await this.assignmentRepository.update(assignmentId, { completed: true });
-     
+  async markAsCompleted(userId: string, surveyId: number ): Promise<String> {
+      const assignment = await this.assignmentRepository.findOne({
+        where: { userId, survey: { id: surveyId } },
+        relations: ['survey'],
+      });
+     if (!assignment) {
+        throw new Error('Assignment not found');
+      }
+      assignment.completed = true;
+      await this.assignmentRepository.save(assignment);
+      return "La encuesta ha sido respondida";
   }
-
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async checkExpiringAssignmentsEveryDay() {
     const today = new Date();
@@ -42,15 +66,13 @@ export class SurveyAssignmentService {
     })
     
     for (const assignment of assignments) {
-      await this.sendEmailReminder(assignment.userId, assignment.survey.id , assignment.endDate); ;
+      await this.sendEmailReminder(assignment.userId, assignment.survey.id , assignment.endDate ,); ;
     }
   };
-
-  //PARTES A CAMBIAR 
   private async sendEmailReminder(userId: string, surveyId: number , Date: Date) {
     
     const user : User = await this.getUser(userId);
-  //CAMBIAR ESTO CUANDO TENGA ALGUN TIPO DE GET USUARIO POR ID
+  
     await this.sendSurveyReminder(
       user.firstName + ' ' + user.lastName,
       user.email,
@@ -58,7 +80,7 @@ export class SurveyAssignmentService {
       Date
     );
   }
-  //AQUI CONECTAR AL OTRO SERVICIO
+  
   private async getUser(userId: string): Promise<User> {
     try {
       const response = await axios.get<User>(`${process.env.PUERTO_USER}/user/${userId}`);
@@ -69,19 +91,6 @@ export class SurveyAssignmentService {
     }
   }
   
-  //PARA PROBAR SIN CONECTAR AL OTRO SERVICIO
-  async sednEmail(surveyId: number ) {
-    const userEmail = 'drkoppa.10@gmail.com'
-    const date = new Date();
-    date.setTime(date.getTime()+1);
-    await this.sendSurveyReminder(
-      'John Doe',
-      userEmail,
-      surveyId,
-      date
-    );
-  }
-
   async sendSurveyReminder(userName: string, userEmail: string, surveyId: number, endDate: Date): Promise<SentMessageInfo> {
     const surveyLink = process.env.CLIENT_URL;
     return await this.mailerService.sendMail({
@@ -116,5 +125,7 @@ export class SurveyAssignmentService {
     });
 
   }
+
+
 
 }
