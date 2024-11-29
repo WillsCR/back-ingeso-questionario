@@ -12,13 +12,13 @@ export class ResponseController {
   async save(@Body() saveResponsesDto: SaveResponsesDto): Promise<ResponseMessage<Response[]>> {
     return this.responseService.saveResponses(saveResponsesDto);
   }
-
+  //OBTIENE RESPUESTAS POR USUARIO y ENCUESTA
   @Get('user/:userId/survey/:surveyId') 
   async getUserResponsesBySurvey(@Param('userId') userId: string, @Param('surveyId') surveyId: string): Promise<Response[]> {
     
     return this.responseService.getUserResponsesBySurvey(+userId, +surveyId); 
   }
-  
+  //RESPUESTAS POR USUARIO
   @Get('/answered-surveys/:userId')
   async getAnsweredSurveysByUser(@Param('userId') userId: number) {
     const surveys = await this.responseService.getAnsweredSurveysByUser(userId);
@@ -33,6 +33,15 @@ export class ResponseController {
     const responses = await this.responseService.getUserResponsesBySubject(+userId, subject);
     if (!responses.length) {
       throw new NotFoundException('No responses found for the given user and subject.');
+    }
+    return responses;
+  }
+  //OBTIENE RESPUESTAS POR ASIGNATURA
+  @Get ('/subject/:subject')
+  async getAnswerbySubject( subject: string): Promise<Response[]> {
+    const responses = await this.responseService.getAnswerbySubject(subject);
+    if (!responses.length) {
+      throw new NotFoundException('No responses found for the given subject.');
     }
     return responses;
   }

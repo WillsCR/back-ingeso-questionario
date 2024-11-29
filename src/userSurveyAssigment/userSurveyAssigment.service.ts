@@ -15,6 +15,7 @@ export class SurveyAssignmentService {
   constructor(
     @InjectRepository(SurveyAssignment)
     private readonly assignmentRepository: Repository<SurveyAssignment>,
+    @InjectRepository(Survey)
     private readonly surveyRepository: Repository<Survey>,
     private mailerService: MailerService
   ) {}
