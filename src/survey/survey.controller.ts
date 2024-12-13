@@ -13,6 +13,11 @@ export class SurveyController {
     return this.surveyService.create(createSurveyDto);
   }
 
+  @Get('/subject/:subject')
+  async findBySubject(@Param('subject') subject: string): Promise<ResponseMessage<Survey[]>> {
+    return this.surveyService.findBySubject(subject);
+  }
+
   @Get()
   async findAll(): Promise<Survey[]> {
     return this.surveyService.findAll();

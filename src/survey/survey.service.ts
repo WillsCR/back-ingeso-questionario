@@ -24,7 +24,7 @@ export class SurveyService {
     const newSurvey = new Survey();
     newSurvey.title = createSurveyDto.title;
     newSurvey.description = createSurveyDto.description;
-  
+    newSurvey.subject = createSurveyDto.subject;
     try {
       const savedSurvey = await this.surveyRepository.save(newSurvey);
       
@@ -66,6 +66,7 @@ export class SurveyService {
     const survey = await this.findOne(id);
     survey.title = updateSurveyDto.title;
     survey.description = updateSurveyDto.description;
+    survey.subject = updateSurveyDto.subject;
 
     
     survey.dimensions = await Promise.all(
@@ -113,4 +114,56 @@ export class SurveyService {
       relations: ['dimensions', 'dimensions.items'],
     });
   }
+
+  async findBySubject(subject: string): Promise<ResponseMessage<Survey[]>> {
+    try {
+      const surveys = await this.surveyRepository.find({
+        where: { subject },
+        relations: ['dimensions', 'dimensions.items'],
+      });
+  
+      if (surveys.length === 0) {
+        return {
+          success: false,
+          message: `No surveys found for subject: ${subject}`,
+          data: [],
+        };
+      }
+  
+      return {
+        success: true,
+        message: 'Surveys retrieved successfully',
+        data: surveys,
+      };
+    } catch (error) {
+      console.error('Error finding surveys by subject:', error);
+      throw new InternalServerErrorException('Could not retrieve surveys');
+    }
+  }
+
+  async remove(id: number): Promise<ResponseMessage<void>> {
+    try {
+      const survey = await this.surveyRepository.findOne({ where: { id } });
+  
+      if (!survey) {
+        return {
+          success: false,
+          message: `Survey with id ${id} not found`,
+          data: null,
+        };
+      }
+  
+      await this.surveyRepository.remove(survey);
+  
+      return {
+        success: true,
+        message: `Survey with id ${id} deleted successfully`,
+        data: null,
+      };
+    } catch (error) {
+      console.error('Error deleting survey:', error);
+      throw new InternalServerErrorException('Could not delete survey');
+    }
+  }
+
 }

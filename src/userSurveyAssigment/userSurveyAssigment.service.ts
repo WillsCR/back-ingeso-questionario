@@ -28,8 +28,6 @@ export class SurveyAssignmentService {
     if (!survey) {
       throw new Error('Survey not found');
     }
-
-   
     const assignment = this.assignmentRepository.create({
       userId: CreateAssignmentDto.userId,
       survey: survey,

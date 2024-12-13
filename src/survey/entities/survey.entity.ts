@@ -12,6 +12,9 @@ export class Survey {
   @Column()
   description: string;
 
+  @Column()
+  subject: string;
+  
   @OneToMany(() => Dimension, dimension => dimension.survey,{ cascade: true })
   dimensions: Dimension[];
 

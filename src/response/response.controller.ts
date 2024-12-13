@@ -1,48 +1,45 @@
 import { Controller, Post, Body, Param, Get, NotFoundException } from '@nestjs/common';
 import { ResponseService } from './response.service';
 import { SaveResponsesDto } from './dto/save-response.dto';
+import { Survey } from 'src/survey/entities/survey.entity';
 import { ResponseMessage } from 'src/types/message';
-import { Response } from 'src/response/entities/response.entity';
 
 @Controller('responses')
 export class ResponseController {
   constructor(private readonly responseService: ResponseService) {}
 
   @Post()
-  async save(@Body() saveResponsesDto: SaveResponsesDto): Promise<ResponseMessage<Response[]>> {
-    return this.responseService.saveResponses(saveResponsesDto);
+  async save(@Body() saveResponsesDto: SaveResponsesDto): Promise<ResponseMessage<void>>{
+    return await this.responseService.saveResponses(saveResponsesDto);
   }
-  //OBTIENE RESPUESTAS POR USUARIO y ENCUESTA
-  @Get('user/:userId/survey/:surveyId') 
-  async getUserResponsesBySurvey(@Param('userId') userId: string, @Param('surveyId') surveyId: string): Promise<Response[]> {
-    
-    return this.responseService.getUserResponsesBySurvey(+userId, +surveyId); 
+
+  @Post('/delete/:id')
+  async deleteResponseById(@Param('id') id: number): Promise<void> {
+    await this.responseService.deleteResponseById(id);
   }
-  //RESPUESTAS POR USUARIO
-  @Get('/answered-surveys/:userId')
-  async getAnsweredSurveysByUser(@Param('userId') userId: number) {
-    const surveys = await this.responseService.getAnsweredSurveysByUser(userId);
-    if (!surveys.length) {
-      throw new NotFoundException('No answered surveys found for the given user.');
+
+  @Get('/survey/:userId/:subject')
+  async findSurveyByUserandSubject(@Param('userId') userId: number, @Param('subject') subject: string): Promise<ResponseMessage<Survey>> {
+    return await this.responseService.findSurveyByUserandSubject(userId, subject);
+  }
+
+  @Get('/subject/:subject')
+  async findSurveysAnsweredBySubject(@Param('subject') subject: string): Promise<Survey[]> {
+    return await this.responseService.findSurveysAnsweredBySubject(subject);
+  }
+
+  @Get('/user/:userId')
+  async findSurveysAnsweredByUser(@Param('userId') userId: number): Promise<ResponseMessage<Survey[]>> {
+    return await this.responseService.findSurveysAnsweredByUser(userId);
+  }
+  @Get('/survey/:surveyId/user/:userId')
+  async findAnswersBySurveyAndUser(@Param('surveyId') surveyId: number, @Param('userId') userId: number): Promise<any> {
+    const response = await this.responseService.getResponsesByUserAndSurvey(userId, surveyId);
+
+    if (!response.success) {
+      throw new NotFoundException(response.message);
     }
-    return surveys;
-  }
-  //OBTIENES LAS RESPUESTAS DE UN USUARIO POR ASIGNATURA
-  @Get('/user/:userId/subject/:subject')
-  async getUserResponsesBySubject(@Param('userId') userId: string, @Param('subject') subject: string): Promise<Response[]> {
-    const responses = await this.responseService.getUserResponsesBySubject(+userId, subject);
-    if (!responses.length) {
-      throw new NotFoundException('No responses found for the given user and subject.');
-    }
-    return responses;
-  }
-  //OBTIENE RESPUESTAS POR ASIGNATURA
-  @Get ('/subject/:subject')
-  async getAnswerbySubject( subject: string): Promise<Response[]> {
-    const responses = await this.responseService.getAnswerbySubject(subject);
-    if (!responses.length) {
-      throw new NotFoundException('No responses found for the given subject.');
-    }
-    return responses;
+
+    return response;
   }
 }

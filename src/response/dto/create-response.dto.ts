@@ -8,7 +8,7 @@ export class CreateResponseDto {
   @IsNumber()
   @IsNotEmpty()
   itemId: number; 
-
+  
   @IsString()
   @IsNotEmpty()
   answer: string;

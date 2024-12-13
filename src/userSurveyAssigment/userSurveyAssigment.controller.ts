@@ -5,14 +5,14 @@ import { completeAssignmentDto, CreateAssignmentDto } from './dto/surveyAssigmen
 @Controller('survey-assignments')
 export class SurveyAssignmentController {
   constructor(private readonly assignmentService: SurveyAssignmentService) {}
-// VER EL TEMA DE ENVIAR MAIL NUEVAMENTE
+
 
   @Post()
   async createAssignment(@Body() data: CreateAssignmentDto ): Promise<SurveyAssignment> {
     return this.assignmentService.createAssignment(data);
   }
 
- 
+  
   @Post('complete')
   async markAsCompleted(@Body()data: completeAssignmentDto ) : Promise<String> {
     const response = await this.assignmentService.markAsCompleted(data.userId, data.surveyId);

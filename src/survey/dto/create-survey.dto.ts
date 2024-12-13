@@ -27,6 +27,9 @@ export class CreateSurveyDto {
   @IsNotEmpty()
   description: string;
 
+  @IsNotEmpty({ message: 'El campo "subject" es obligatorio' })
+  subject: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateDimensionDto)

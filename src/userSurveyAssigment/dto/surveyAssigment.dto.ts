@@ -15,12 +15,12 @@ export class CreateAssignmentDto {
   @IsString()
   @IsNotEmpty()
   userMail: string;
-
+  //Asignatura (subjetc)
   @IsString()
   @IsNotEmpty()
   signature: string;
 }
-
+// -> asignas un usuario a una encuesta  {fecha limite}
 export class completeAssignmentDto {
   @IsString()
   @IsNotEmpty()

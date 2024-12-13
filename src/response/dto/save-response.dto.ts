@@ -27,4 +27,13 @@ export class SaveResponsesDto {
   @Type(() => ResponseItemDto) 
   responses: ResponseItemDto[];
   
+  
+  @IsString()
+  @IsNotEmpty({ message: 'La asignatura no puede estar vacia' })
+  subject: string
+
+  @IsNumber()
+  @IsNotEmpty({ message: 'El surveyId es obligatorio' })
+  surveyId: number
+
 }
