@@ -38,12 +38,35 @@ export class SurveyAssignmentService {
 
     return this.assignmentRepository.save(assignment);
   }
-  async findAssignmentsExpiringOn(date: Date): Promise<SurveyAssignment[]> {
-    return this.assignmentRepository.find({
-      where: { endDate: date, completed: false },
-      relations: ['survey'],
-    });
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+async checkExpiringAssignmentsEveryDay() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1); 
+
+  const assignments = await this.findAssignmentsExpiringOn(tomorrow);
+
+  for (const assignment of assignments) {
+    await this.sendEmailReminder(
+      assignment.userId,
+      assignment.survey.id,
+      assignment.endDate,
+      assignment.userMail
+    );
   }
+}
+
+
+async findAssignmentsExpiringOn(date: Date): Promise<SurveyAssignment[]> {
+  return this.assignmentRepository.find({
+    where: {
+      endDate: date, 
+      completed: false,
+    },
+    relations: ['survey'], 
+  });
+}
   async markAsCompleted(userId: string, surveyId: number ): Promise<String> {
       const assignment = await this.assignmentRepository.findOne({
         where: { userId, survey: { id: surveyId } },
@@ -56,36 +79,10 @@ export class SurveyAssignmentService {
       await this.assignmentRepository.save(assignment);
       return "La encuesta ha sido respondida";
   }
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  async checkExpiringAssignmentsEveryDay() {
   
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); 
-
-  const assignments = await this.assignmentRepository.find({
-    where: {
-      endDate: today, 
-      completed: false,
-    },
-  });
-
- 
-  for (const assignment of assignments) {
-    await this.sendEmailReminder(
-      assignment.userId,
-      assignment.survey.id,
-      assignment.endDate,
-    );
-  }
-}
-  private async sendEmailReminder(userId: string, surveyId: number , Date: Date) {
-    
-    const user : User = await this.getUser(userId);
-  
+  private async sendEmailReminder(userId: string, surveyId: number , Date: Date, userMail: string) {
     await this.sendSurveyReminder(
-      user.firstName + ' ' + user.lastName,
-      user.email,
-      surveyId,
+      userMail,
       Date
     );
   }
@@ -100,7 +97,7 @@ export class SurveyAssignmentService {
     }
   }
   
-  async sendSurveyReminder(userName: string, userEmail: string, surveyId: number, endDate: Date): Promise<SentMessageInfo> {
+  async sendSurveyReminder( userEmail: string, endDate: Date): Promise<SentMessageInfo> {
     const surveyLink = process.env.CLIENT_URL;
     return await this.mailerService.sendMail({
       to: userEmail,
@@ -118,7 +115,7 @@ export class SurveyAssignmentService {
       </head>
       <body>
         <h1 style="text-align: center;">Recordatorio de Encuesta Pendiente</h1>
-        <p>¡Hola ${userName}! 👋</p>
+        <p>¡Hola ! 👋</p>
         <p>Te recordamos que tienes una encuesta pendiente por responder, la cual vence el <strong>${endDate.toLocaleDateString()}</strong>.</p>
         <p>Para responder la encuesta, haz clic en el siguiente enlace:</p>
         <div style="text-align: center; margin: 20px;">
