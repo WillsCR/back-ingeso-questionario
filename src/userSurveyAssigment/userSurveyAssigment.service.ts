@@ -125,6 +125,17 @@ export class SurveyAssignmentService {
 
   }
 
+  async getUncompletedAssignments(): Promise<SurveyAssignment[]> {
+    return this.assignmentRepository.find({
+      where: { completed: false },
+      relations: ['survey'],
+    });
+  }
 
-
+  async getCompletedAssignments(): Promise<SurveyAssignment[]> {
+    return this.assignmentRepository.find({
+      where: { completed: true },
+      relations: ['survey'],
+    });
+  }
 }
