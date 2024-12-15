@@ -8,6 +8,7 @@ import { Dimension } from './survey/entities/dimension.entity';
 import { Survey } from './survey/entities/survey.entity';
 import { SurveyAssignmentModule } from './userSurveyAssigment/userSurveyAssigment.module';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { ConfigModule } from '@nestjs/config';
     }),
     SurveyModule,
     ResponseModule,
-    SurveyAssignmentModule
+    SurveyAssignmentModule,
+    ScheduleModule.forRoot(), 
   ],
 })
 export class AppModule {}

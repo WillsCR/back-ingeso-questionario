@@ -17,8 +17,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
         port: 587,
         secure: false,
         auth: {
-          user: process.env.MAIL,
-          pass: process.env.PASSWORD,
+          user: 'ucnexample@gmail.com',
+          pass: 'nzqh hmno guar eveg',
         },
       },
       defaults: {

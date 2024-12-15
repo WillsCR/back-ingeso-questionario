@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { SurveyAssignment } from './entities/userSurveyAssigment.entity';
 import {Cron, CronExpression } from '@nestjs/schedule';
 import { ResponseMessage } from 'src/types/message';
@@ -28,10 +28,11 @@ export class SurveyAssignmentService {
     if (!survey) {
       throw new Error('Survey not found');
     }
+    const date = new Date(CreateAssignmentDto.endDate);
     const assignment = this.assignmentRepository.create({
       userId: CreateAssignmentDto.userId,
       survey: survey,
-      endDate: CreateAssignmentDto.endDate,
+      endDate: date,
       userMail: CreateAssignmentDto.userMail,
       signature: CreateAssignmentDto.signature
     });
@@ -44,9 +45,9 @@ async checkExpiringAssignmentsEveryDay() {
   today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1); 
-
+  console.log(tomorrow);
   const assignments = await this.findAssignmentsExpiringOn(tomorrow);
-
+  console.log(assignments);
   for (const assignment of assignments) {
     await this.sendEmailReminder(
       assignment.userId,
@@ -57,14 +58,21 @@ async checkExpiringAssignmentsEveryDay() {
   }
 }
 
-
+ 
 async findAssignmentsExpiringOn(date: Date): Promise<SurveyAssignment[]> {
+  
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);  
+  console.log(startOfDay);
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);  
+  console.log(endOfDay);
   return this.assignmentRepository.find({
     where: {
-      endDate: date, 
+      endDate: Between(startOfDay, endOfDay),  
       completed: false,
     },
-    relations: ['survey'], 
+    relations: ['survey'],
   });
 }
   async markAsCompleted(userId: string, surveyId: number ): Promise<String> {
@@ -85,6 +93,7 @@ async findAssignmentsExpiringOn(date: Date): Promise<SurveyAssignment[]> {
       userMail,
       Date
     );
+    console.log('Email reminder sent successfully');
   }
   
   private async getUser(userId: string): Promise<User> {
@@ -96,9 +105,17 @@ async findAssignmentsExpiringOn(date: Date): Promise<SurveyAssignment[]> {
       throw new Error('No se pudo obtener el usuario');
     }
   }
-  
+
+  async testsendEmail(userMail: string, endDate: Date) {
+    await this.sendSurveyReminder(
+      userMail,
+      endDate
+    );
+  }
+
   async sendSurveyReminder( userEmail: string, endDate: Date): Promise<SentMessageInfo> {
     const surveyLink = process.env.CLIENT_URL;
+    const formattedDate  = new Date(endDate).toLocaleDateString('es-CL');  // Convertir y formatear
     return await this.mailerService.sendMail({
       to: userEmail,
       from: '"Equipo de soporte" <support@example.com>',
@@ -116,7 +133,7 @@ async findAssignmentsExpiringOn(date: Date): Promise<SurveyAssignment[]> {
       <body>
         <h1 style="text-align: center;">Recordatorio de Encuesta Pendiente</h1>
         <p>¡Hola ! 👋</p>
-        <p>Te recordamos que tienes una encuesta pendiente por responder, la cual vence el <strong>${endDate.toLocaleDateString()}</strong>.</p>
+        <p>Te recordamos que tienes una encuesta pendiente por responder, la cual vence el <strong>${formattedDate}</strong>.</p>
         <p>Para responder la encuesta, haz clic en el siguiente enlace:</p>
         <div style="text-align: center; margin: 20px;">
           <a href="${surveyLink}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">

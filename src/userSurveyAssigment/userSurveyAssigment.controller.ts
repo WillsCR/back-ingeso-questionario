@@ -23,9 +23,23 @@ export class SurveyAssignmentController {
   async getUncompletedAssignments(): Promise<SurveyAssignment[]> {
     return this.assignmentService.getUncompletedAssignments();
   }
+
   @Get('completed')
   async getCompletedAssignments(): Promise<SurveyAssignment[]> {
     return this.assignmentService.getCompletedAssignments();
   }
 
+  @Post('reminder/:userMail/:endDate')
+async testsendEmail(
+  @Param('userMail') userMail: string,
+  @Param('endDate') endDate: string 
+) {
+  const dateObject = new Date(endDate); 
+  console.log(dateObject);
+  if (isNaN(dateObject.getTime())) {
+    throw new Error('La fecha proporcionada no es válida');
+  }
+
+  await this.assignmentService.testsendEmail(userMail, dateObject);
+}
 }
