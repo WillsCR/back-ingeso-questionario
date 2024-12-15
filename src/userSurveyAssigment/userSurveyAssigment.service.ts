@@ -58,16 +58,26 @@ export class SurveyAssignmentService {
   }
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async checkExpiringAssignmentsEveryDay() {
-    const today = new Date();
-    today.setTime(today.getTime()+1)
-    const assignments = await this.assignmentRepository.find({
-      where: { endDate: today, completed: false },
-    })
-    
-    for (const assignment of assignments) {
-      await this.sendEmailReminder(assignment.userId, assignment.survey.id , assignment.endDate ,); ;
-    }
-  };
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); 
+
+  const assignments = await this.assignmentRepository.find({
+    where: {
+      endDate: today, 
+      completed: false,
+    },
+  });
+
+ 
+  for (const assignment of assignments) {
+    await this.sendEmailReminder(
+      assignment.userId,
+      assignment.survey.id,
+      assignment.endDate,
+    );
+  }
+}
   private async sendEmailReminder(userId: string, surveyId: number , Date: Date) {
     
     const user : User = await this.getUser(userId);
