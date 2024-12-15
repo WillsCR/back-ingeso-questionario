@@ -10,6 +10,7 @@ export class CreateAssignmentDto {
   userId: string;
 
   @IsNotEmpty()
+  @IsDateString()
   endDate:Date;
 
   @IsString()
