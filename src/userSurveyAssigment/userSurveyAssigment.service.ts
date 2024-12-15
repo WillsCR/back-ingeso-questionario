@@ -36,7 +36,7 @@ export class SurveyAssignmentService {
       userMail: CreateAssignmentDto.userMail,
       signature: CreateAssignmentDto.signature
     });
-
+ 
     return this.assignmentRepository.save(assignment);
   }
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -162,4 +162,14 @@ async findAssignmentsExpiringOn(date: Date): Promise<SurveyAssignment[]> {
       relations: ['survey'],
     });
   }
+
+    
+  async surveyHasDeadline(surveyId: number): Promise<boolean> {
+    const assignment = await this.assignmentRepository.findOne({
+      where: { survey: { id: surveyId } },
+    });
+    //true si existe surveyId entre los assignment, else false
+    return !!assignment;
+  }
+
 }

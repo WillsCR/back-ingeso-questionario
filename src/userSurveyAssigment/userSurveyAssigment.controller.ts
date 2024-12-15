@@ -42,4 +42,9 @@ async testsendEmail(
 
   await this.assignmentService.testsendEmail(userMail, dateObject);
 }
+
+  @Get('has-deadline/:surveyId')
+  async surveyHasDeadline(@Param('surveyId') surveyId: number): Promise<boolean> {
+    return this.assignmentService.surveyHasDeadline(surveyId);
+  }
 }
